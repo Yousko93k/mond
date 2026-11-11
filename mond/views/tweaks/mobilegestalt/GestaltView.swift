@@ -1,3 +1,4 @@
+
 //
 //  GestaltView.swift
 //  mond
@@ -33,15 +34,28 @@ struct TweakToggle: View {
     }
 }
 
-fileprivate func mg_ui_state() -> (String, Bool, String, String) {
-    (selected_st, enable_device_name, mg_device_name, product_type)
+fileprivate func mg_ui_state() -> (String, Bool, String, String, Int) {
+    (
+        selected_st,
+        enable_device_name,
+        mg_device_name,
+        product_type,
+        custom_st_value
+    )
 }
 
-fileprivate func mg_apply_ui_state(_ selected: String, _ enableName: Bool, _ deviceName: String, _ product: String) {
+fileprivate func mg_apply_ui_state(
+    _ selected: String,
+    _ enableName: Bool,
+    _ deviceName: String,
+    _ product: String,
+    _ customSubtype: Int
+) {
     selected_st = selected
     enable_device_name = enableName
     mg_device_name = deviceName
     product_type = product
+    custom_st_value = customSubtype
 }
 
 struct GestaltView: View {
@@ -55,17 +69,31 @@ struct GestaltView: View {
     @State private var product_type: String = ""
     @State private var tweak_version: Int = 0
 
+    @State private var custom_subtype_input: String = ""
+    @State private var show_custom_subtype_alert: Bool = false
+    @State private var last_non_custom_subtype: String = "og"
+
     var body: some View {
         NavigationStack {
             List {
                 if !is_valid || is_empty {
                     Section {
                         if is_empty {
-                            PlainAlert(title: "Do not reboot!", icon: "exclamationmark.triangle.fill", text: "Your MobileGestalt.plist seems to be empty.", color: Color.yellow)
+                            PlainAlert(
+                                title: "Do not reboot!",
+                                icon: "exclamationmark.triangle.fill",
+                                text: "Your MobileGestalt.plist seems to be empty.",
+                                color: Color.yellow
+                            )
                         }
 
                         if !is_valid {
-                            PlainAlert(title: "Do not reboot!", icon: "exclamationmark.triangle.fill", text: "Your MobileGestalt.plist seems to be invalid.", color: Color.yellow)
+                            PlainAlert(
+                                title: "Do not reboot!",
+                                icon: "exclamationmark.triangle.fill",
+                                text: "Your MobileGestalt.plist seems to be invalid.",
+                                color: Color.yellow
+                            )
                         }
                     } header: {
                         Label("Warning", systemImage: "exclamationmark.triangle")
@@ -76,7 +104,13 @@ struct GestaltView: View {
 
                 Section {
                     Button {
-                        mg_apply_ui_state(selected_st, enable_device_name, mg_device_name, product_type)
+                        mg_apply_ui_state(
+                            selected_st,
+                            enable_device_name,
+                            mg_device_name,
+                            product_type,
+                            custom_st_value
+                        )
                         mg_apply()
                         tweak_version += 1
                     } label: {
@@ -89,7 +123,7 @@ struct GestaltView: View {
                     } label: {
                         Text("Revert Tweaks")
                     }
-                    
+
                     Button {
                         state.respring()
                     } label: {
@@ -100,7 +134,21 @@ struct GestaltView: View {
                 }
 
                 Section {
-                    Picker(selection: $selected_st) {
+                    Picker(
+                        selection: Binding(
+                            get: { selected_st },
+                            set: { newValue in
+                                if newValue == "custom" {
+                                    custom_subtype_input = String(custom_st_value)
+                                    selected_st = "custom"
+                                    show_custom_subtype_alert = true
+                                } else {
+                                    selected_st = newValue
+                                    last_non_custom_subtype = newValue
+                                }
+                            }
+                        )
+                    ) {
                         Text("Original (\(og_st))").tag("og")
 
                         if is_device_good() {
@@ -119,7 +167,7 @@ struct GestaltView: View {
                         if doubleSystemVersion() >= 26.0 {
                             Text("iPhone Air").tag("air")
                         }
-                        
+
                         if doubleSystemVersion() >= 27.0 {
                             Text("iPhone Duo").tag("duo")
                         }
@@ -127,6 +175,8 @@ struct GestaltView: View {
                         if has_home_button() {
                             Text("iPhone X Gestures").tag("x")
                         }
+
+                        Text("Custom Subtype…").tag("custom")
                     } label: {
                         HStack {
                             Text("Subtype")
@@ -160,9 +210,11 @@ struct GestaltView: View {
                     TweakToggle(title: "iPhone 16 Camera Control Settings")
                     TweakToggle(title: "Action Button Settings")
                     TweakToggle(title: "Collision SOS")
+
                     if has_home_button() {
                         TweakToggle(title: "Tap to Wake")
                     }
+
                     TweakToggle(title: "Pulse Width Modulation")
                 } header: {
                     Label("Hardware-Oriented Features", systemImage: "iphone")
@@ -176,28 +228,33 @@ struct GestaltView: View {
                     HStack(spacing: 10) {
                         Picker("Spoofing", selection: $product_type) {
                             Text("Default").tag(machine_name())
+
                             if UIDevice.current.userInterfaceIdiom == .pad {
                                 if doubleSystemVersion() >= 17.4 {
                                     Text("iPad Pro 11-inch (M4)").tag("iPad16,3")
                                     Text("iPad Pro 11-inch (M4, Cellular)").tag("iPad16,4")
                                 }
+
                                 Text("iPad Pro 11-inch (4th Gen)").tag("iPad14,3")
                                 Text("iPad Pro 11-inch (4th Gen, Cellular)").tag("iPad14,4")
                             } else {
                                 Text("iPhone 15 Pro").tag("iPhone16,1")
                                 Text("iPhone 15 Pro Max").tag("iPhone16,2")
+
                                 if doubleSystemVersion() >= 18.0 {
                                     Text("iPhone 16").tag("iPhone17,3")
                                     Text("iPhone 16 Plus").tag("iPhone17,4")
                                     Text("iPhone 16 Pro").tag("iPhone17,1")
                                     Text("iPhone 16 Pro Max").tag("iPhone17,2")
                                 }
+
                                 if doubleSystemVersion() >= 19.0 {
                                     Text("iPhone 17").tag("iPhone18,3")
                                     Text("iPhone 17 Pro").tag("iPhone18,1")
                                     Text("iPhone 17 Pro Max").tag("iPhone18,2")
                                     Text("iPhone Air").tag("iPhone18,4")
                                 }
+
                                 if doubleSystemVersion() >= 27.0 {
                                     Text("iPhone 18 Pro").tag("iPhone19,2")
                                     Text("iPhone 18 Pro Max").tag("iPhone19,7")
@@ -250,14 +307,48 @@ struct GestaltView: View {
             .tint(Color("AccentColor"))
             .task {
                 mg_load()
+
                 while is_loading {
                     try? await Task.sleep(for: .milliseconds(50))
                 }
+
                 let s = mg_ui_state()
+
                 selected_st = s.0
                 enable_device_name = s.1
                 mg_device_name = s.2
                 product_type = s.3
+                custom_st_value = s.4
+
+                if s.0 != "custom" {
+                    last_non_custom_subtype = s.0
+                }
+            }
+            .alert("Custom Subtype", isPresented: $show_custom_subtype_alert) {
+                TextField(
+                    "ArtworkDeviceSubType",
+                    text: $custom_subtype_input
+                )
+                .keyboardType(.numberPad)
+
+                Button("Cancel", role: .cancel) {
+                    selected_st = last_non_custom_subtype
+                }
+
+                Button("Save") {
+                    if let value = Int(custom_subtype_input), value >= 0 {
+                        custom_st_value = value
+                    } else {
+                        selected_st = last_non_custom_subtype
+
+                        Alertinator.shared.alert(
+                            title: "Invalid subtype",
+                            body: "Enter a valid non-negative integer."
+                        )
+                    }
+                }
+            } message: {
+                Text("Enter the numeric ArtworkDeviceSubType value to apply.")
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
