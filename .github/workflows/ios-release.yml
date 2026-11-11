@@ -1,3 +1,4 @@
+
 name: build and release
 
 on:
@@ -17,7 +18,7 @@ concurrency:
 
 jobs:
   build-and-release:
-    runs-on: macos-latest
+    runs-on: getmac
 
     steps:
       - name: checkout
@@ -43,6 +44,12 @@ jobs:
           mkdir -p Payload
 
           APP_PATH="$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name '*.app' -print -quit)"
+
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: No .app file was generated."
+            exit 1
+          fi
+
           cp -R "$APP_PATH" Payload/
 
           ditto -c -k --keepParent Payload mond.ipa
