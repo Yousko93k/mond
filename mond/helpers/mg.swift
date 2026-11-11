@@ -1,3 +1,4 @@
+
 //
 //  mg.swift
 //  mond
@@ -17,11 +18,11 @@ struct mg_tweak {
     let info_t: InfoType?
     let info_msg: String?
     let can_apply: (NSMutableDictionary) -> String?
-    
+
     let r: (NSMutableDictionary) -> Bool
     let w_on: (NSMutableDictionary) -> Void
     let w_off: (NSMutableDictionary) -> Void
-    
+
     enum InfoType {
         case info
         case warning
@@ -168,7 +169,7 @@ let all_tweaks: [mg_tweak] = [
     mg_tweak(title: "Stage Manager Support", key: "qeaj75wk3HF4DwQ8qbIi7g", value: 1, info_t: .info, info_msg: "Flags the device as capable of Stage Manager."),
     mg_tweak(title: "Apple Internal Install", key: "EqrsVvjcYDdxHBiQmGhAWw", value: 1, info_t: .warning, info_msg: "Turns on internal features like the Metal HUD; some services may act up."),
     mg_tweak(title: "Internal Storage View", key: "LBJfwOEzExRxzlAnSuI7eg", value: 1, info_t: .warning, info_msg: "Displays internal files in the Storage settings; can be dangerous on some iPads."),
-    
+
     mg_tweak(
         title: "Disable Region Restrictions",
         minv: nil,
@@ -192,7 +193,7 @@ let all_tweaks: [mg_tweak] = [
             cache_extra.removeObject(forKey: region_info_key)
         }
     ),
-    
+
     mg_tweak(
         title: "Apple Intelligence",
         minv: 18.1,
@@ -216,7 +217,7 @@ let all_tweaks: [mg_tweak] = [
             cache_extra.removeObject(forKey: "A62OafQ85EJAiiqKn4agtg")
         }
     ),
-    
+
     mg_tweak(
         title: "Enable iPadOS Mode",
         minv: nil,
@@ -248,9 +249,9 @@ let all_tweaks: [mg_tweak] = [
             guard let cache_data = dict["CacheData"] as? NSMutableData,
                   let cache_extra = dict["CacheExtra"] as? NSMutableDictionary,
                   let value_off = cache_data_safe_offset("mtrAoWJ3gsq+I90ZnQ0vQw", in: cache_data) else { return }
-            
+
             cache_data.mutableBytes.storeBytes(of: 3, toByteOffset: value_off, as: Int.self)
-            
+
             let values: [String: Int] = [
                 "mG0AnH/Vy1veoqoLRAIgTA": 1,
                 "UCG5MkVahJxG1YULbbd5Bg": 1,
@@ -258,7 +259,7 @@ let all_tweaks: [mg_tweak] = [
                 "nVh/gwNpy7Jv1NOk00CMrw": 1,
                 "uKc7FPnEO++lVhHWHFlGbQ": 1,
             ]
-            
+
             for (key, value) in values {
                 cache_extra[key] = value
             }
@@ -267,16 +268,16 @@ let all_tweaks: [mg_tweak] = [
             guard let cache_data = dict["CacheData"] as? NSMutableData,
                   let cache_extra = dict["CacheExtra"] as? NSMutableDictionary,
                   let value_off = cache_data_safe_offset("mtrAoWJ3gsq+I90ZnQ0vQw", in: cache_data) else { return }
-            
+
             cache_data.mutableBytes.storeBytes(of: 1, toByteOffset: value_off, as: Int.self)
-            
+
             let keys = ["mG0AnH/Vy1veoqoLRAIgTA", "UCG5MkVahJxG1YULbbd5Bg", "ZYqko/XM5zD3XBfN5RmaXA", "nVh/gwNpy7Jv1NOk00CMrw", "uKc7FPnEO++lVhHWHFlGbQ"]
             for key in keys {
                 cache_extra.removeObject(forKey: key)
             }
         }
     ),
-    
+
     mg_tweak(
         title: "Internal Features",
         minv: nil,
@@ -304,7 +305,7 @@ let all_tweaks: [mg_tweak] = [
                   let off_apple_internal_install = cache_data_safe_offset("EqrsVvjcYDdxHBiQmGhAWw", in: cache_data),
                   let off_has_internal_settings_bundle = cache_data_safe_offset("Oji6HRoPi7rH7HPdWVakuw", in: cache_data),
                   let off_internal_build = cache_data_safe_offset("LBJfwOEzExRxzlAnSuI7eg", in: cache_data) else { return }
-            
+
             cache_data.mutableBytes.storeBytes(of: 1, toByteOffset: off_apple_internal_install, as: Int.self)
             cache_data.mutableBytes.storeBytes(of: 1, toByteOffset: off_has_internal_settings_bundle, as: Int.self)
             cache_data.mutableBytes.storeBytes(of: 1, toByteOffset: off_internal_build, as: Int.self)
@@ -314,7 +315,7 @@ let all_tweaks: [mg_tweak] = [
                   let off_apple_internal_install = cache_data_safe_offset("EqrsVvjcYDdxHBiQmGhAWw", in: cache_data),
                   let off_has_internal_settings_bundle = cache_data_safe_offset("Oji6HRoPi7rH7HPdWVakuw", in: cache_data),
                   let off_internal_build = cache_data_safe_offset("LBJfwOEzExRxzlAnSuI7eg", in: cache_data) else { return }
-            
+
             cache_data.mutableBytes.storeBytes(of: 0, toByteOffset: off_apple_internal_install, as: Int.self)
             cache_data.mutableBytes.storeBytes(of: 0, toByteOffset: off_has_internal_settings_bundle, as: Int.self)
             cache_data.mutableBytes.storeBytes(of: 0, toByteOffset: off_internal_build, as: Int.self)
@@ -326,7 +327,7 @@ extension mg_tweak {
     func is_on(in dict: NSMutableDictionary) -> Bool { return r(dict) }
     func apply_on(to dict: NSMutableDictionary) { w_on(dict) }
     func apply_off(to dict: NSMutableDictionary) { w_off(dict) }
-    
+
     func supported() -> Bool {
         guard let minv = minv else { return true }
         return doubleSystemVersion() >= minv
@@ -335,11 +336,11 @@ extension mg_tweak {
 
 func is_device_good() -> Bool {
     let supported: [String] = ["iPhone15,2", "iPhone15,3", "iPhone15,4", "iPhone15,5", "iPhone16,1", "iPhone16,2", "iPhone17,3", "iPhone17,4", "iPhone17,1", "iPhone17,2", "iPhone18,3", "iPhone18,1", "iPhone18,2", "iPhone17,5"]
-    
+
     if supported.contains(machine_name()) && doubleSystemVersion() < 19.0 {
         return true
     }
-    
+
     return false
 }
 
@@ -347,7 +348,7 @@ func machine_name() -> String {
     var sys_info = utsname()
     uname(&sys_info)
     let machine_mirror = Mirror(reflecting: sys_info.machine)
-    
+
     return machine_mirror.children.reduce("") { identifier, element in
         guard let value = element.value as? Int8, value != 0 else { return identifier }
         return identifier + String(UnicodeScalar(UInt8(value)))
@@ -422,8 +423,13 @@ var mg_device_name: String {
 
 var og_st: Int = 0
 var selected_st: String = "og"
+var custom_st_value: Int = 0
 
 var selected_st_value: Int {
+    if selected_st == "custom" {
+        return custom_st_value
+    }
+
     switch selected_st {
         case "og":
             return og_st
@@ -446,7 +452,7 @@ var selected_st_value: Int {
         case "x":
             return 2436
         default:
-            return 0
+            return og_st
     }
 }
 
@@ -488,14 +494,12 @@ func mg_load() {
 
             let loaded_dict = try NSMutableDictionary(contentsOf: mg_url_now, error: ())
 
-            // this'll cache gestalt and put it in a safe place
             let mg_url_saved = URL(fileURLWithPath: AppPaths.backups).appendingPathComponent("SavedGestalt.plist")
 
             if !FileManager.default.fileExists(atPath: mg_url_saved.path) {
                 try FileManager.default.copyItem(at: mg_url_now, to: mg_url_saved)
             }
 
-            // get og gestalt values
             let mg_saved_dict = try NSMutableDictionary(contentsOf: mg_url_saved, error: ())
             let og_cache_extra = mg_saved_dict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
             let og_artwork = og_cache_extra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary ?? NSMutableDictionary()
@@ -506,7 +510,10 @@ func mg_load() {
             let cache_extra = loaded_dict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
             let artwork = cache_extra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary ?? NSMutableDictionary()
 
-            let new_selected_st = st_to_sel[artwork["ArtworkDeviceSubType"] as? Int ?? og_subtype] ?? "og"
+            let loaded_subtype = artwork["ArtworkDeviceSubType"] as? Int ?? og_subtype
+            let new_selected_st = st_to_sel[loaded_subtype] ?? "custom"
+            let new_custom_st_value = loaded_subtype
+
             let new_device_name = artwork["ArtworkDeviceProductDescription"] as? String ?? og_device_name
             let new_enable_device_name = new_device_name != og_device_name
 
@@ -521,6 +528,7 @@ func mg_load() {
                 mg_dict_now = loaded_dict
                 og_st = og_subtype
                 selected_st = new_selected_st
+                custom_st_value = new_custom_st_value
                 mg_device_name = new_device_name
                 enable_device_name = new_enable_device_name
                 product_type = new_product_type
@@ -546,13 +554,14 @@ func mg_apply() {
         if !product_type.isEmpty {
             cache_extra["h9jDsbgj7xIVeIQ8S3/X3Q"] = product_type
         }
-        
+
         let artwork_dict = cache_extra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary ?? NSMutableDictionary()
         artwork_dict["ArtworkDeviceSubType"] = selected_st_value
+
         if enable_device_name {
             artwork_dict["ArtworkDeviceProductDescription"] = mg_device_name
         }
-        
+
         let data = try PropertyListSerialization.data(fromPropertyList: mg_dict_now, format: .xml, options: 0)
 
         try mg_write(data)
@@ -702,7 +711,6 @@ func mg_write(_ data: Data, to path: String) throws {
     }
 }
 
-
 func mg_write(_ data: Data) throws {
     let path = TweakPaths.gestalt
 
@@ -748,7 +756,7 @@ func mg_tweak_binding(_ tweak: mg_tweak) -> Binding<Bool> {
 enum mg_view_err: Error, LocalizedError {
     case missing_artwork_st
     case missing_artwork_device_name
-    
+
     var errorDescription: String? {
         switch self {
             case .missing_artwork_st:
